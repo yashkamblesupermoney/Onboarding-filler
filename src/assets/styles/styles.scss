@@ -1,0 +1,120 @@
+// Write your overrides
+
+
+.v-breadcrumbs-item {
+    opacity: 0.5 !important;
+    color: #4B465C!important;
+}
+
+.v-breadcrumbs-item--disabled {
+    opacity: 1!important;
+}
+
+.heading-card{
+    border: 2px dashed #A8AAAE;
+    width: 12%;
+}
+
+.heading-card-active{
+    border: 2px solid #674AF5;
+    background-color: white;
+}
+
+.heading-card-text{
+    color: #4B465C;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.heading-card-sub-text{
+    color: #4B465C;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.heading-icon-bg {
+    background: #f2f2f4;
+    width:fit-content;
+    margin:auto;
+}
+
+.heading-icon-bg-active {
+    background: #f3f1ff;
+}
+
+.v-switch .v-label{
+    color: #6F6B7D;
+}
+
+.v-switch--inset .v-switch__track {
+    min-width: 3rem !important;
+    padding: 12px !important;
+}
+
+.v-switch.v-switch--inset .v-selection-control--dirty .v-selection-control__input {
+    transform: translateX(12px) !important;
+}
+
+.v-switch.v-switch--inset .v-selection-control__input {
+    transform: translateX(-10px) !important;
+}
+
+.table-header-column {
+    color: #4B465C;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.v-pagination__item--is-active > .v-btn{
+    opacity: 1 !important;
+    background: #674AF5;
+    color: white !important;
+}
+
+.v-tabs.v-tabs--horizontal:not(.v-tabs-pill) {
+    border-block-end : 0px
+}
+
+.v-tab.v-tab.v-btn {
+    font-size: 15px !important;
+    font-weight: 500;
+}
+
+.app-col {
+    width: 20%;padding:10px
+}
+
+.app-col-header {
+    font-size: 13px;
+    font-weight: 400;
+    color:#A5A3AE
+}
+
+.app-col-info {
+    font-size: 13px;
+    font-weight: 700;
+    color:#4B465C
+}
+
+.app-picker-field > .v-input--horizontal{
+    margin-top: -2px;
+}
+
+.v-selection-control--inline > .v-label {
+    font-size: 15px !important;
+}
+
+#loader > .v-overlay__content{
+  width: 100%;
+  height: 100%;
+}
+
+.v-progress-circular{
+  margin: auto;
+    height: 100% !important;
+    display: block;
+}
+
+.v-overlay__scrim {
+  background: rgba(47, 43, 61, 0.3) !important;
+}
