@@ -65,6 +65,7 @@ export interface LendersMapping {
     collectPDC: boolean
     requiredCPV: boolean
     applicationForm: string | null
+    onboardingDocGroupId: string | null
     isPOIPOAPOBSoftcopyRequired: boolean
     psd: boolean
     getFinancePlanRespList: FinancePlan[]
@@ -91,11 +92,13 @@ export interface Programs {
 interface LPState {
     getProgramsList: Programs[]
     getProgramsLenderMappingList: LendersMapping[]
+    documentGroupId: String | null
 }
 
 const initialState: LPState = {
     getProgramsList: [],
     getProgramsLenderMappingList: [],
+    documentGroupId: ''
 }
 
 // Slice
@@ -112,6 +115,12 @@ const LPSlice = createSlice({
         resetLPState() {
             return initialState
         },
+        setDocumentGroupId(state, action: PayloadAction<string>) {
+            const lender = state.getProgramsLenderMappingList.find(
+                (item) => item.lenderId === +action.payload
+            )
+            state.documentGroupId = lender?.onboardingDocGroupId || null
+        }
     },
 })
 
@@ -120,6 +129,7 @@ export const {
     setProgramsList,
     setProgramsLenderMappingList,
     resetLPState,
+    setDocumentGroupId
 } = LPSlice.actions
 
 export default LPSlice.reducer

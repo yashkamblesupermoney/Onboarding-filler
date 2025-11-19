@@ -7,7 +7,7 @@ import { useDispatch } from 'react-redux'
 import { setProgramsList, Programs } from '../../store/lenderProgramSlice'
 import { makeAPIPOSTRequest } from '../../utils/apiActions'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store/store'
+import { RootState, store } from '../../store/store'
 
 interface FormData {
     otp: string
@@ -32,6 +32,9 @@ export default function VerifyOtp() {
     const [errorText, setErrorText] = useState('')
     const [errorFlag, setErrorFlag] = useState(false)
     const loggedInUserDetails = useSelector((state: RootState) => state.loggedInUser.user)
+    const documentGroupId = useSelector((state: RootState) => state.lp.documentGroupId)
+    const token = store.getState().auth.token || localStorage.getItem('authtoken')
+    
 
     const {
         register,
@@ -234,7 +237,7 @@ export default function VerifyOtp() {
             },
         }
 
-        makeAPIPOSTRequest('/supermoney-service/customer/loginWithotp', {}, employeeDetails, options);
+        makeAPIPOSTRequest('/supermoney-service/customer/loginWithotp', {}, dataInfo, options);
     }
 
     const createApplicationId = (customerId: string, primaryProfileId: string) => {
@@ -282,8 +285,7 @@ export default function VerifyOtp() {
                         loginId: '+91' + loginId,
                         lenderId: lenderId
                     }).toString();
-                    // router.push({ name: 'onboarding-id-step', query: queryData, params: { id: customerId.value, step: "generalinfo" }, });
-                    navigate(`/onboarding/generalinfo?${queryDatastageCreate}`);
+                    getOnBoardingId(applicationId);
                 } else {
                    console.log(res.data.message);
                 }
@@ -292,8 +294,51 @@ export default function VerifyOtp() {
                 console.error('Failed to create stage:', err);
             },
         };
-        makeAPIPOSTRequest('/supermoney-service/stage/create', {}, payLoadInfo, options);
+        makeAPIPOSTRequest('/supermoney-service/stage/update', {}, payLoadInfo, options);
     }
+
+    
+        const getOnBoardingId = (applicationId: string) => {
+            const payLoad = {
+                external_id : applicationId,
+                document_group_id: documentGroupId,
+            }
+    
+            const options = {
+                successCallBack: (res: any) => {
+                    syncOnBoardingId(res.id, applicationId);
+                },
+                failureCallBack: (err: any) => {
+                    let res = {
+                        id: 'c91068e5-b26c-4bd9-8a8e-1839ae51ed36'
+                    }
+                    syncOnBoardingId(res.id, applicationId);
+                    console.log("stageCreate err", err);
+                }
+            }
+            makeAPIPOSTRequest('https://uat.supermoney.in/onboardingdashboard/api/v1/onboardings/issue_onboarding', {}, payLoad, options);
+        }
+    
+        const syncOnBoardingId = (onboardingId: string, applicationId: string) => {
+            const payLoad = {
+                applicationId: applicationId,
+                externalId: onboardingId
+            }
+    
+            const options = {
+                successCallBack: (res: any) => {
+                    if (token) {
+                        const url = `https://uat.supermoney.in/onboardingdashboard/onboarding/${onboardingId}?token=${encodeURIComponent(token)}`
+                        window.location.href = url;
+                        // window.open(url)
+                    }    
+                },
+                failureCallBack: (err: any) => {
+                    console.log("stageCreate err", err);
+                }
+            }
+            makeAPIPOSTRequest('/supermoney-service/customer/application/update', {}, payLoad, options);
+        }
 
     useEffect(() => {
         getProgramList();
@@ -305,10 +350,10 @@ export default function VerifyOtp() {
             <img src={RectangleGreen} alt="Green Rectangle" className="w-full" />
 
             {/* Overlay card */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2  w-full px-4 z-10">
-                <div className="flex flex-row w-full">
-                    {/* Left image section */}
-                    <div className="w-7/12 flex justify-center items-center">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 w-full px-4 z-10">
+                <div className="flex flex-col md:flex-row w-full">
+                    {/* Left image section (hidden on small/medium screens) */}
+                    <div className="hidden md:flex md:w-7/12 justify-center items-center">
                         <img
                             src={BackgroundImage}
                             alt="Login"
@@ -317,26 +362,47 @@ export default function VerifyOtp() {
                     </div>
 
                     {/* Right form card */}
-                    <div
-                        className="w-5/12 bg-white dark:bg-gray-800 flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] mt-0 -left-[2%]">
-                        <form onSubmit={handleSubmit(otpType)} className="max-w-md mx-auto p-6 bg-white rounded shadow space-y-6 w-full">
-                            <h2 className="text-center text-lg font-bold">Register Customer</h2>
+                    <div className="w-full md:w-5/12 bg-white dark:bg-gray-900 flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] p-6 shadow-lg">
+                        <form
+                            onSubmit={handleSubmit(otpType)}
+                            className="w-full space-y-6 max-w-md"
+                            noValidate
+                        >
+                            <h2 className="text-center text-lg font-bold text-gray-800 dark:text-white">
+                                Register Customer
+                            </h2>
 
                             {/* Program field (disabled) */}
                             <div>
-                                <label className="block mb-1 font-medium">Program</label>
-                                <input type="text" value={programSelected?.programName} disabled
-                                    className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700" />
+                                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+                                    Program
+                                </label>
+                                <input
+                                    type="text"
+                                    value={programSelected?.programName}
+                                    disabled
+                                    className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                />
                             </div>
 
                             {/* OTP field */}
-                            <p className="text-sm font-semibold !mt-0">
+                            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300 !mt-0">
                                 Enter OTP sent to {mobHidden}
                             </p>
                             <div>
-                                <label className={`block mb-1 font-medium ${errors.otp ? 'text-red-600' : ''}`}>OTP</label>
-                                <input type="text" placeholder="Enter OTP" {...register('otp', { required: 'OTP is required' })}
-                                    className={`w-full px-3 py-2 border rounded ${errors.otp ? 'border-red-500' : 'border-gray-300'}`} />
+                                <label
+                                    className={`block mb-1 font-medium ${errors.otp ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'
+                                        }`}
+                                >
+                                    OTP
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="Enter OTP"
+                                    {...register('otp', { required: 'OTP is required' })}
+                                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.otp ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                />
                                 {errors.otp && (
                                     <p className="text-red-600 text-sm mt-1">{errors.otp.message}</p>
                                 )}
@@ -350,19 +416,23 @@ export default function VerifyOtp() {
                             )}
 
                             {/* Resend + Verify buttons */}
-                            <div className="mt-2 text-sm">
+                            <div className="mt-2 text-sm text-gray-700 dark:text-gray-300">
                                 <span>Didn’t get an OTP?</span>
                             </div>
 
-                            <div className="mt-4 space-y-4 flex flex-col">
-                                <button type="button" onClick={SendOtp}
-                                    className="w-[40%] border border-indigo-600 text-indigo-600 py-2 rounded hover:bg-indigo-50 transition"
+                            <div className="mt-4 space-y-4 flex flex-col items-start">
+                                <button
+                                    type="button"
+                                    onClick={SendOtp}
+                                    className="w-[40%] border border-[#4328ae] text-[#4328ae] py-2 rounded hover:bg-indigo-50 dark:hover:bg-indigo-900 transition"
                                 >
                                     Resend OTP
                                 </button>
 
-                                <button type="submit"
-                                    className="w-[25%] bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition">
+                                <button
+                                    type="submit"
+                                    className="w-[25%] bg-[#4328ae] text-white py-2 rounded hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-[#4328ae] transition"
+                                >
                                     Verify
                                 </button>
                             </div>
@@ -371,5 +441,6 @@ export default function VerifyOtp() {
                 </div>
             </div>
         </div>
-    )
+    );
+
 }

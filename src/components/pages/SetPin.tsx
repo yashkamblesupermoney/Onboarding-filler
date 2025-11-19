@@ -37,6 +37,7 @@ const SetPin: React.FC = () => {
 
     const programsList = useSelector((state: RootState) => state.lp.getProgramsList);
     const loggedInUserDetails = useSelector((state: RootState) => state.loggedInUser.user);
+    const documentGroupId = useSelector((state: RootState) => state.lp.documentGroupId)
     const token = store.getState().auth.token || localStorage.getItem('authtoken')
 
 
@@ -141,10 +142,10 @@ const SetPin: React.FC = () => {
                         lenderId: lenderId
                     }).toString();
                     if (!token) {
-                        console.error('No auth token found in localStorage');
+                        console.error('No auth token found');
                         return;
                     }
-                    console.log(queryData, customerId)
+                    getOnBoardingId(applicationId);
                     // window.location.href = `https://smartdash.mintwalk.com/onboarding-uat/#/onboarding/${customerId}/generalinfo?token=${encodeURIComponent(token)}&${queryData}`
 
                     // window.location.href = `https://smartdash.mintwalk.com/onboarding-uat/#/?token=${encodeURIComponent(token)}`
@@ -160,6 +161,50 @@ const SetPin: React.FC = () => {
         }
         makeAPIPOSTRequest('/supermoney-service/stage/update', {}, dataInfo, options);
     }
+
+    const getOnBoardingId = (applicationId: string) => {
+        const payLoad = {
+            external_id : applicationId,
+            document_group_id: documentGroupId,
+        }
+
+        const options = {
+            successCallBack: (res: any) => {
+                syncOnBoardingId(res.id, applicationId);
+            },
+            failureCallBack: (err: any) => {
+                let res = {
+                    id: 'c91068e5-b26c-4bd9-8a8e-1839ae51ed36'
+                }
+                syncOnBoardingId(res.id, applicationId);
+                console.log("stageCreate err", err);
+            }
+        }
+        makeAPIPOSTRequest('https://uat.supermoney.in/onboardingdashboard/api/v1/onboardings/issue_onboarding', {}, payLoad, options);
+    }
+
+    const syncOnBoardingId = (onboardingId: string, applicationId: string) => {
+        const payLoad = {
+            applicationId: applicationId,
+            externalId: onboardingId
+        }
+
+        const options = {
+            successCallBack: (res: any) => {
+                if (token) {
+                    const url = `https://uat.supermoney.in/onboardingdashboard/onboarding/${onboardingId}?token=${encodeURIComponent(token)}`
+                    // window.location.href = url;
+                    window.open(url)
+                }    
+            },
+            failureCallBack: (err: any) => {
+                console.log("stageCreate err", err);
+            }
+        }
+        makeAPIPOSTRequest('/supermoney-service/customer/application/update', {}, payLoad, options);
+    }
+
+
     useEffect(() => {
         const matchedProgram = programsList?.find(
             (p: any) => p.programName === programIDSet
@@ -175,10 +220,10 @@ const SetPin: React.FC = () => {
             <img src={RectangleGreen} alt="Green Rectangle" className="w-full" />
 
             {/* Overlay card */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2  w-full px-4 z-10">
-                <div className="flex flex-row w-full">
-                    {/* Left image section */}
-                    <div className="w-7/12 flex justify-center items-center">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 w-full px-4 z-10">
+                <div className="flex flex-col md:flex-row w-full">
+                    {/* Left image section (hidden on small/medium screens) */}
+                    <div className="hidden md:flex md:w-7/12 justify-center items-center">
                         <img
                             src={BackgroundImage}
                             alt="Login"
@@ -187,18 +232,21 @@ const SetPin: React.FC = () => {
                     </div>
 
                     {/* Right form card */}
-                    <div
-                        className="w-5/12 bg-white dark:bg-gray-800 flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] mt-0 -left-[2%]">
+                    <div className="w-full md:w-5/12 bg-white dark:bg-gray-900 flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] p-6 shadow-lg">
                         <form
                             onSubmit={handleSubmit(verifyCustomerPin)}
-                            className="w-full px-8 py-6 space-y-6 max-w-md mx-auto p-6 bg-white rounded shadow space-y-6"
+                            className="w-full space-y-6 max-w-md"
                             noValidate
                         >
-                            <h2 className="text-center text-lg font-bold">Register Customer</h2>
+                            <h2 className="text-center text-lg font-bold text-gray-800 dark:text-white">
+                                Register Customer
+                            </h2>
 
                             {/* Set Pin */}
                             <div>
-                                <label className="block mb-1 font-medium">Set Pin</label>
+                                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+                                    Set Pin
+                                </label>
                                 <input
                                     type="number"
                                     maxLength={4}
@@ -209,7 +257,7 @@ const SetPin: React.FC = () => {
                                             message: 'Max length is 4 characters',
                                         },
                                     })}
-                                    className={`w-full px-3 py-2 border rounded ${errors.setPin ? 'border-red-500' : 'border-gray-300'
+                                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.setPin ? 'border-red-500' : 'border-gray-300'
                                         }`}
                                     placeholder="Enter Pin"
                                 />
@@ -220,7 +268,9 @@ const SetPin: React.FC = () => {
 
                             {/* Confirm Pin */}
                             <div>
-                                <label className="block mb-1 font-medium">Confirm Pin</label>
+                                <label className="block mb-1 font-medium text-gray-700 dark:text-gray-300">
+                                    Confirm Pin
+                                </label>
                                 <input
                                     type="number"
                                     maxLength={4}
@@ -229,7 +279,7 @@ const SetPin: React.FC = () => {
                                         validate: (value) =>
                                             value === setPin || 'Pins do not match',
                                     })}
-                                    className={`w-full px-3 py-2 border rounded ${errors.confirmPin ? 'border-red-500' : 'border-gray-300'
+                                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.confirmPin ? 'border-red-500' : 'border-gray-300'
                                         }`}
                                     placeholder="Enter Pin"
                                 />
@@ -242,7 +292,7 @@ const SetPin: React.FC = () => {
                             <div className="mt-4">
                                 <button
                                     type="submit"
-                                    className="bg-indigo-600 text-white py-2 px-6 rounded hover:bg-indigo-700 transition"
+                                    className="bg-[#4328ae] text-white py-2 px-6 rounded hover:bg-indigo-700 transition dark:bg-indigo-500 dark:hover:bg-[#4328ae]"
                                 >
                                     Confirm Pin
                                 </button>
@@ -252,6 +302,7 @@ const SetPin: React.FC = () => {
                 </div>
             </div>
         </div>
-    )
+    );
+
 }
 export default SetPin;

@@ -4,10 +4,10 @@ import { otpFormSchema } from '../../validations/validation'
 import { set, success, z } from 'zod'
 import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { RootState } from '../../store/store'
+import { RootState, store } from '../../store/store'
 import { useDispatch } from 'react-redux'
 import { makeAPIPOSTRequest } from '../../utils/apiActions'
-import { setProgramsLenderMappingList } from '../../store/lenderProgramSlice'
+import { setDocumentGroupId, setProgramsLenderMappingList } from '../../store/lenderProgramSlice'
 import { useNavigate } from 'react-router-dom'
 
 type FormData = z.infer<typeof otpFormSchema>
@@ -17,6 +17,9 @@ export default function SendOtpForm() {
     const navigate = useNavigate();
     const programsList = useSelector((state: RootState) => state.lp.getProgramsList);
     const lendersMappingList = useSelector((state: RootState) => state.lp.getProgramsLenderMappingList);
+    const documentGrpID = useSelector((state: RootState) => state.lp.documentGroupId)
+    const token = store.getState().auth.token || localStorage.getItem('authtoken')
+    
 
     const {
         register,
@@ -100,7 +103,7 @@ export default function SendOtpForm() {
                     else {
                         if (res.errorMessage.includes("Oops! Seems user id is already taken.")) {
                             setLoginType('loginPin')
-                            verifyCustomerForLenderFunction()
+                            verifyCustomerForLenderFunction('loginPin')
                         }
                         else {
                             setError('mobileNo', { type: 'manual', message: res.data.errorDetails[0].errorDesc });
@@ -114,7 +117,7 @@ export default function SendOtpForm() {
         makeAPIPOSTRequest('/supermoney-service/customer/verify/existing', {}, dataInfo, options)
     }
 
-    const verifyCustomerForLenderFunction = () => {
+    const verifyCustomerForLenderFunction = (loginType: string) => {
         const formData = getValues();
         let dataInfo = {
             loginId: "+91" + formData.mobileNo,
@@ -139,7 +142,7 @@ export default function SendOtpForm() {
         makeAPIPOSTRequest('/supermoney-service/customer/application/checkApplicationId', {}, dataInfo, options)
     }
 
-    const SendOtp = () => {
+    const SendOtp = (loginType: string = 'verifyMobile') => {
         const formData = getValues();
         const msgHeader = {
             authToken: "", //dynamic
@@ -206,74 +209,133 @@ export default function SendOtpForm() {
 
 
     return (
-        <form onSubmit={handleSubmit(verifyExistingCustomer)} className="max-w-md mx-auto p-6 bg-white rounded shadow space-y-6">
-            <h2 className="text-center text-lg font-bold">Register Customer</h2>
+        <form
+            onSubmit={handleSubmit(verifyExistingCustomer)}
+            className="max-w-md mx-auto p-6 bg-white dark:bg-gray-900 rounded shadow space-y-6"
+        >
+            <h2 className="text-center text-lg font-bold text-gray-800 dark:text-white">
+                Register Customer
+            </h2>
+
+            {/* Mobile No */}
             <div>
-                <label className={`block mb-1 font-medium ${errors.mobileNo ? 'text-red-600' : ''}`}>Mobile No</label>
+                <label
+                    className={`block mb-1 font-medium ${errors.mobileNo ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                >
+                    Mobile No
+                </label>
                 <input
                     type="text"
                     {...register('mobileNo')}
                     maxLength={10}
-                    className={`w-full px-3 py-2 border rounded ${errors.mobileNo ? 'border-red-500' : 'border-gray-300'
+                    placeholder="Enter mobile number"
+                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.mobileNo ? 'border-red-500' : 'border-gray-300'
                         }`}
                 />
-                {errors.mobileNo && <p className="text-red-600 text-sm mt-1">{errors.mobileNo.message}</p>}
+                {errors.mobileNo && (
+                    <p className="text-red-600 text-sm mt-1">{errors.mobileNo.message}</p>
+                )}
             </div>
 
+            {/* Program */}
             <div>
-                <label className={`block mb-1 font-medium ${errors.program ? 'text-red-600' : ''}`}>Select Program</label>
+                <label
+                    className={`block mb-1 font-medium ${errors.program ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                >
+                    Select Program
+                </label>
                 <select
                     {...register('program')}
                     onChange={(e) => handleProgramSelect(e.target.value)}
-                    className={`w-full px-3 py-2 border rounded ${errors.program ? 'border-red-500' : 'border-gray-300'}`}
+                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.program ? 'border-red-500' : 'border-gray-300'
+                        }`}
                 >
                     <option value="">Select Program</option>
-                    {programsList.map(p => (
+                    {programsList.map((p) => (
                         <option key={p.programId} value={p.programId}>
                             {p.programName}
                         </option>
                     ))}
                 </select>
-                {errors.program && <p className="text-red-600 text-sm mt-1">{errors.program.message}</p>}
+                {errors.program && (
+                    <p className="text-red-600 text-sm mt-1">{errors.program.message}</p>
+                )}
             </div>
 
+            {/* Lender */}
             <div>
-                <label className={`block mb-1 font-medium ${errors.lender ? 'text-red-600' : ''}`}>Lender Name</label>
+                <label
+                    className={`block mb-1 font-medium ${errors.lender ? 'text-red-600' : 'text-gray-700 dark:text-gray-300'
+                        }`}
+                >
+                    Lender Name
+                </label>
                 <select
                     {...register('lender')}
-                    className={`w-full px-3 py-2 border rounded ${errors.lender ? 'border-red-500' : 'border-gray-300'}`}
+                    onChange={(e) => dispatch(setDocumentGroupId(e.target.value))}
+                    className={`w-full px-3 py-2 border rounded text-gray-900 dark:text-white dark:bg-gray-800 dark:border-gray-600 ${errors.lender ? 'border-red-500' : 'border-gray-300'
+                        }`}
                 >
                     <option value="">
-                        {lendersMappingList.length === 0 ? 'No data available' : 'Select Lender Name'}
+                        {lendersMappingList.length === 0
+                            ? 'No data available'
+                            : 'Select Lender Name'}
                     </option>
-                    {lendersMappingList.map(l => (
+                    {lendersMappingList.map((l) => (
                         <option key={l.lenderId} value={l.lenderId}>
                             {l.lenderName}
                         </option>
                     ))}
                 </select>
-                {errors.lender && <p className="text-red-600 text-sm mt-1">{errors.lender.message}</p>}
+                {errors.lender && (
+                    <p className="text-red-600 text-sm mt-1">{errors.lender.message}</p>
+                )}
             </div>
 
+            {/* Checkboxes */}
             <div className="space-y-2">
                 <label className="flex items-center">
-                    <input type="checkbox" {...register('termsAgreed')} className="mr-2" />
-                    <span className={`${errors.termsAgreed ? 'text-red-600' : 'text-[#736CCC]'}`}>I agree to the Terms & Conditions</span>
+                    <input
+                        type="checkbox"
+                        {...register('termsAgreed')}
+                        className="mr-2"
+                    />
+                    <span
+                        className={`${errors.termsAgreed
+                                ? 'text-red-600'
+                                : 'text-[#736CCC] dark:text-indigo-300'
+                            }`}
+                    >
+                        I agree to the Terms & Conditions
+                    </span>
                 </label>
                 <label className="flex items-center">
-                    <input type="checkbox" {...register('whatsappAgreed')} className="mr-2" />
-                    <span className={`${errors.whatsappAgreed ? 'text-red-600' : 'text-[#736CCC]'}`}>
+                    <input
+                        type="checkbox"
+                        {...register('whatsappAgreed')}
+                        className="mr-2"
+                    />
+                    <span
+                        className={`${errors.whatsappAgreed
+                                ? 'text-red-600'
+                                : 'text-[#736CCC] dark:text-indigo-300'
+                            }`}
+                    >
                         I agree to be contacted on WhatsApp & SMS
                     </span>
                 </label>
             </div>
 
+            {/* Submit Button */}
             <button
                 type="submit"
-                className="w-[50%] bg-[#7367f0] text-white py-2 rounded hover:bg-indigo-700 transition"
+                className="w-[50%] bg-[#7367f0] text-white py-2 rounded hover:bg-indigo-700 dark:hover:bg-[#4328ae] transition"
             >
                 Get OTP
             </button>
         </form>
-    )
+    );
+
 }

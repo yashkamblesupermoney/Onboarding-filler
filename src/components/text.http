@@ -1,0 +1,16 @@
+
+
+POST https://uat.supermoney.in/onboardingdashboard/api/v1/onboardings/issue_onboarding
+Content-Type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJST0xFUyI6WzFdLCJpc3MiOiJzdXBlcm1vbmV5IiwiQ1VTVE9NRVJfSUQiOjAsIlVTRVJfSUQiOiIxMjAiLCJTRVNTSU9OX0lEIjoiMDFmMGM1NDYtYTg4Zi0xYWUzLTliOGYtYWRmOWJhZmFlZWEzIiwiUFJPR1JBTV9JRCI6MSwiaWF0IjoxNzYzNTMyMTY2fQ.esQRpDE0TfbBEr3StU3QjsyqyY2hD8o2l6J6ByeCVSPMpqUhR_NSPdVyfkG8FZYjUOiDwJ8y1c5jx6UvVpu0nA
+
+{
+    "external_id": "232323",
+    "document_group_id": null
+}
+
+
+###
+
+
+GET https://www.youtube.com/

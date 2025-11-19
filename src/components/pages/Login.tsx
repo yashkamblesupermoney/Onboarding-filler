@@ -464,6 +464,7 @@ export const Login: React.FC = () => {
             try {
                 window.grecaptcha.render("recaptcha-container", {
                     sitekey: "6Ld8bpwqAAAAAD0IzCr8elcGnNzhEv2nKIO8Iewz",
+                    // sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI", //for local testing
                     callback: onCaptchaSuccess,
                     "expired-callback": onCaptchaExpired
                 });
@@ -488,7 +489,7 @@ export const Login: React.FC = () => {
     return (
         <div id="page-login" className="grid grid-cols-1 md:grid-cols-12 min-h-screen ">
             {/* Left Side (Image + Logo) */}
-            <div className="hidden md:flex md:col-span-8 flex-col bg-[#f8f8f8]">
+            <div className="hidden md:flex md:col-span-8 flex-col bg-[#f8f8f8] dark:bg-gray-900">
                 {/* Logo */}
                 <div className="w-full p-6">
                     <img src={logo} alt="logo" className="h-10" />
@@ -505,17 +506,17 @@ export const Login: React.FC = () => {
             </div>
 
             {/* Right Side (Login Form) */}
-            <div className="col-span-12 md:col-span-4 flex items-center bg-white justify-center px-6 py-10 overflow-hidden dark:bg-gray-900">
+            <div className="col-span-12 md:col-span-4 flex md:items-center bg-white justify-center px-6 py-10 overflow-hidden dark:bg-gray-900">
                 <div className="w-full max-w-sm text-[#6e6b7b]">
                     {/* Heading */}
-                    <h1 className="text-2xl font-bold">Login</h1>
-                    <p className="text-sm  mt-2">
+                    <h1 className="text-lg font-bold">Login</h1>
+                    <p className="text-sm text-[700]">
                         Welcome back, please login to your account.
                     </p>
 
                     {/* Email Input */}
                     <div className="mt-6">
-                        <label htmlFor="loginTextOne" className="block text-sm font-medium ">
+                        <label htmlFor="loginTextOne" className="block text-xs font-medium ">
                             Email / Mobile Number
                         </label>
                         <div className="relative mt-1">
@@ -528,7 +529,7 @@ export const Login: React.FC = () => {
                                 onChange={handleEmailChange}
                                 placeholder="Enter email id or mobile number"
                                 className={`w-full border ${emailError ? "border-red-500" : "border-gray-300"
-                                    } rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                                    } rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-400 placeholder:text-xs placeholder:dark:text-black`}
                             />
                             <i className="absolute right-3 top-2.5 text-gray-400 feather icon-user"></i>
                         </div>
@@ -540,12 +541,12 @@ export const Login: React.FC = () => {
                     {/* Password Input */}
                     <div className="mt-6">
                         <div className="flex justify-between items-center">
-                            <label htmlFor="passwordText" className="block text-sm font-medium ">
+                            <label htmlFor="passwordText" className="block text-xs font-medium ">
                                 Password
                             </label>
                             <button
                                 onClick={forgotPassClick}
-                                className="text-xs text-indigo-600 hover:underline"
+                                className="text-xs text-[#4328ae] hover:underline"
                             >
                                 Forgot Password?
                             </button>
@@ -560,7 +561,7 @@ export const Login: React.FC = () => {
                                 onChange={handlePasswordChange}
                                 placeholder="Enter password"
                                 className={`w-full border ${passwordError ? "border-red-500" : "border-gray-300"
-                                    } rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                                    } rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-400 placeholder:text-xs placeholder:dark:text-black`}
                             />
                             <i className="absolute right-3 top-2.5 text-gray-400 feather icon-lock"></i>
                         </div>
@@ -581,9 +582,9 @@ export const Login: React.FC = () => {
                             type="checkbox"
                             checked={rememberMe}
                             onChange={handleRememberMeChange}
-                            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                            className="h-4 w-4 rounded border-gray-300 text-[#4328ae] focus:ring-indigo-500"
                         />
-                        <label htmlFor="rememberMe" className="ml-2 text-sm ">
+                        <label htmlFor="rememberMe" className="ml-2 text-xs ">
                             Remember Me
                         </label>
                     </div>
@@ -594,7 +595,7 @@ export const Login: React.FC = () => {
                             type="button"
                             onClick={validateTextField}
                             disabled={progress}
-                            className="w-full py-2 rounded-md bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full py-2 rounded-md bg-[#4328ae] text-white font-semibold hover:bg-indigo-700 transition disabled:opacity-70 disabled:cursor-not-allowed"
                         >
                             {progress ? "Logging in..." : "Login"}
                         </button>

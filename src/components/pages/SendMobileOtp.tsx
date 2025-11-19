@@ -83,32 +83,35 @@ export default function SendMobileOtp() {
     }, [])
 
     return (
-        <>
-            <div className="p-4 text-black dark:text-red-500 dark:border-2 border-red-500">📱 Send Mobile OTP Page</div>
-            <div className="relative w-full">
-                {/* Full-width green rectangle background */}
-                <img src={RectangleGreen} alt="Green Rectangle" className="w-full" />
+  <>
+    {/* Background and Overlay */}
+    <div className="relative w-full">
+      {/* Full-width green rectangle background */}
+      <img src={RectangleGreen} alt="Green Rectangle" className="w-full" />
 
-                {/* Overlay container */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2  w-full px-4 z-10">
-                    <div className="flex flex-row w-full">
-                        {/* Left image section */}
-                        <div className="w-7/12 flex justify-center items-center">
-                            <img
-                                src={BackgroundImage}
-                                alt="Login"
-                                className="w-[110%] max-w-none"
-                            />
-                        </div>
+      {/* Overlay container */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 w-full px-4 z-10">
+        <div className="flex flex-col md:flex-row w-full">
+          {/* Left image section (hidden on small/medium screens) */}
+          <div className="hidden md:flex md:w-7/12 justify-center items-center">
+            <img
+              src={BackgroundImage}
+              alt="Login"
+              className="w-[110%] max-w-none"
+            />
+          </div>
 
-                        {/* Right form card */}
-                        <div className="w-5/12 bg-white flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] mt-0 -left-[2%]">
-                            <SendOtpForm />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {/* <RegisterCustomer/> */}
-        </>
-    )
+          {/* Right form card */}
+          <div className="w-full md:w-5/12 bg-white dark:bg-gray-900 flex flex-col justify-center items-center relative overflow-hidden rounded-[25px] p-6 shadow-lg">
+            <SendOtpForm />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Optional: RegisterCustomer component */}
+    {/* <RegisterCustomer /> */}
+  </>
+);
+
 }
